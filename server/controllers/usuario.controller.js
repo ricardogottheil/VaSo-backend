@@ -1,47 +1,132 @@
 const Usuario = require('../models/usuario');
 
+const bcrypt = require('bcrypt')
+const _ = require('underscore')
+
 const usuarioCtrl = {}
 
 
-usuarioCtrl.getUsuarios = async(req, res) => {
-    const usuarios = await Usuario.find()
-    res.json(usuarios)
+usuarioCtrl.getUsuarios = (req, res) => {
+    restricciones = {}
+    Usuario.find(restricciones, 'nombre edad ciudad direccion email')
+        .exec((err, usuarios) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err,
+                })
+            }
+
+            res.json({
+                ok: true,
+                usuarios,
+            })
+        })
 }
 
-usuarioCtrl.createUsuario = async(req, res) => {
-    const usuario = new Usuario(req.body)
-    await usuario.save()
-    res.json({
-        status: "Usuario guardado"
+usuarioCtrl.createUsuario = (req, res) => {
+
+    let body = req.body;
+
+    let usuario = new Usuario({
+        nombre: body.nombre,
+        edad: body.edad,
+        ciudad: body.ciudad,
+        direccion: body.direccion,
+        email: body.email,
+        password: bcrypt.hashSync(body.password, 10),
+    })
+
+    usuario.save((err, usuarioDB) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err,
+            })
+        }
+
+        res.json({
+            ok: true,
+            usuario: usuarioDB,
+        })
+    })
+
+}
+
+
+usuarioCtrl.getUsuario = (req, res) => {
+
+    let id = req.params.id
+
+    Usuario.findById(id, (err, usuario) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err,
+            })
+        }
+
+        res.json({
+            ok: true,
+            usuario,
+        })
+
+
     })
 }
 
-
-usuarioCtrl.getUsuario = async(req, res) => {
-    const usuario = await Usuario.findById(req.params.id)
-    res.json(usuario)
-}
-
-usuarioCtrl.updateUsuario = async(req, res) => {
+usuarioCtrl.updateUsuario = (req, res) => {
     const { id } = req.params;
+    const body = req.body;
+
     const usuario = {
-        nombre: req.body.nombre,
-        edad: req.body.edad,
-        ciudad: req.body.ciudad,
-        direccion: req.body.direccion,
-        email: req.body.email,
-        password: req.body.password
+        nombre: body.nombre,
+        edad: body.edad,
+        ciudad: body.ciudad,
+        direccion: body.direccion,
+        password: bcrypt.hashSync(body.password, 10),
     }
-    await Usuario.findByIdAndUpdate(id, { $set: usuario }, { new: true })
-    res.json({
-        status: 'Usuario Actualizado'
+    Usuario.findByIdAndUpdate(id, usuario, { new: true, runValidators: true }, (err, usuarioDB) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err,
+            });
+        }
+
+        res.json({
+            ok: true,
+            usuario: usuarioDB,
+        })
+
     })
+
+
 }
 
-usuarioCtrl.deleteUsuario = async(req, res) => {
-    await Usuario.findByIdAndRemove(req.params.id)
-    res.json({
-        status: "Usuario eliminado"
+usuarioCtrl.deleteUsuario = (req, res) => {
+    Usuario.findByIdAndRemove(req.params.id, (err, usuarioDB) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err,
+            });
+        }
+
+        if (!usuarioDB) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario no encontrado',
+                }
+            })
+        }
+
+        res.json({
+            ok: true,
+            message: "Usuario borrado exitosamente"
+        })
     })
 }
 
