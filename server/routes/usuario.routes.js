@@ -18,4 +18,7 @@ router.put('/:id', usuario.updateUsuario)
 // localhost:300/api/usuarios/:id
 router.delete('/:id', usuario.deleteUsuario)
 
+// localhost:300/api/usuarios/login
+router.post('/login', usuario.loginUsuario)
+
 module.exports = router;

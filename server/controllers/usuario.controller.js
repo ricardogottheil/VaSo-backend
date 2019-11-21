@@ -34,7 +34,7 @@ usuarioCtrl.createUsuario = (req, res) => {
         ciudad: body.ciudad,
         direccion: body.direccion,
         email: body.email,
-        password: bcrypt.hashSync(body.password, 10),
+        password: bcrypt.hashSync(body.password, 10)
     })
 
     usuario.save((err, usuarioDB) => {
@@ -129,5 +129,43 @@ usuarioCtrl.deleteUsuario = (req, res) => {
         })
     })
 }
+
+usuarioCtrl.loginUsuario = (req, res) => {
+    let body = req.body;
+
+    Usuario.findOne({ email: body.email }, (err, usuarioDB) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                err,
+            });
+        }
+
+        if (!usuarioDB) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: '(Usuario) o contraseña incorrectos',
+                }
+            });
+        }
+
+        if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario o (contraseña) incorrectos',
+                }
+            });
+        }
+
+        res.json({
+            ok: true,
+            usuario: usuarioDB,
+        })
+
+    })
+}
+
 
 module.exports = usuarioCtrl;
