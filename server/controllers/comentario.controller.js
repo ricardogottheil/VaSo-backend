@@ -8,7 +8,7 @@ const comentarioCtrl = {}
 
 comentarioCtrl.getComentarios = (req, res) => {
     restricciones = {}
-    Comentario.find(restricciones, 'mensaje calificacion')
+    Comentario.find(restricciones, 'nombreCliente emailCliente mensaje productosSeleccionados calificacion')
         .exec((err, comentarios) => {
             if (err) {
                 return res.status(400).json({
@@ -29,7 +29,10 @@ comentarioCtrl.createComentario = (req, res) => {
     let body = req.body;
 
     let comentario = new Comentario({
+        nombreCliente: body.nombreCliente,
+        emailCliente: body.emailCliente,
         mensaje: body.mensaje,
+        productosSeleccionados: body.productosSeleccionados,
         calificacion: body.calificacion,
     })
 
@@ -76,7 +79,10 @@ comentarioCtrl.updateComentario = (req, res) => {
     const body = req.body;
 
     const comentario = {
+        nombreCliente: body.nombreCliente,
+        emailCliente: body.emailCliente,
         mensaje: body.mensaje,
+        productosSeleccionados: body.productosSeleccionados,
         calificacion: body.calificacion,
     }
     Comentario.findByIdAndUpdate(id, comentario, { new: true, runValidators: true }, (err, comentarioDB) => {
