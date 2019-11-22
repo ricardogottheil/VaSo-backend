@@ -29,7 +29,6 @@ comentarioCtrl.createComentario = (req, res) => {
     let body = req.body;
 
     let comentario = new Comentario({
-        nombreCliente: body.nombreCliente,
         emailCliente: body.emailCliente,
         mensaje: body.mensaje,
         productosSeleccionados: body.productosSeleccionados,
@@ -79,7 +78,6 @@ comentarioCtrl.updateComentario = (req, res) => {
     const body = req.body;
 
     const comentario = {
-        nombreCliente: body.nombreCliente,
         emailCliente: body.emailCliente,
         mensaje: body.mensaje,
         productosSeleccionados: body.productosSeleccionados,
